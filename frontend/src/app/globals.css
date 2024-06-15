@@ -2,12 +2,14 @@
 @tailwind components;
 @tailwind utilities;
 
-@keyframes gradient-animation {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
+@keyframes border-animation {
+  0%, 100% { border-color: #3498db; } /* 蓝色 */
+  25% { border-color: #f1c40f; } /* 黄色 */
+  50% { border-color: #e74c3c; } /* 红色 */
+  75% { border-color: #2ecc71; } /* 绿色 */
 }
-  
-  .animated-background {
-    animation: gradient-animation 1s ease-in-out infinite;
-  }
+
+.border-carousel {
+  @apply border-4 border-solid;
+  animation: border-animation 5s linear infinite;
+}

@@ -25,3 +25,12 @@ export const wagmiConfig = createConfig({
     },
 })
 
+
+import { nftAbi } from "@/constants/ContactMe.abi"
+
+const addr = process.env.NEXT_PUBLIC_CONTRACT_ADDR as string
+export const wagmiContractConfig = {
+    address:addr as `0x${string}`,
+    abi:nftAbi
+}
+
