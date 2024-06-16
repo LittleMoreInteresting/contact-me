@@ -23,6 +23,8 @@ contract ContractMe is ERC721, Owned {
     string[] starsImsage;
     address _owner;
     error ALREADY_MINTED();
+    error NOT_MINTED();
+    error NOT_OWNER();
     error ERROR_PRICE();
     error TransferFailed();
     event MINT_SUCCESS(uint256 indexed tokenId);
@@ -60,21 +62,28 @@ contract ContractMe is ERC721, Owned {
         emit MINT_SUCCESS(tokenId);
     }
     
-    function starWork(uint256 tokenId) external view returns(Star  memory star,bool isOwner){
-        if (ownerOf(tokenId) == msg.sender){
-            isOwner = true;
+    function starOf(uint256 tokenId) external view returns(Star  memory star){
+        if (ownerOf(tokenId) != msg.sender){
+            revert NOT_OWNER();
         }
         star = tokenCardStorage[tokenId];
     }
 
+    function starWark() external view returns(Star memory star) {
+        // TODO  使用链上随机数返回 一个 star
+    }
+
     function modifyCard(string memory name,string memory github,string memory x,string memory email) external payable {
+        if(balanceOf(msg.sender)==0){
+            revert NOT_MINTED();
+        }
         uint256 tokenId = userTokens[msg.sender];
-        Star memory start = tokenCardStorage[tokenId];
-        start.name = name;
-        start.github = github;
-        start.x = x;
-        start.email = email;
-        tokenCardStorage[tokenId] = start;
+        Star memory star = tokenCardStorage[tokenId];
+        star.name = name;
+        star.github = github;
+        star.x = x;
+        star.email = email;
+        tokenCardStorage[tokenId] = star;
         emit MODIFY_SUCCESS(tokenId);
     }
 

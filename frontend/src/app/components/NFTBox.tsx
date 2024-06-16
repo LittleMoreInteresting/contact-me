@@ -37,7 +37,7 @@ export default function NFTBox() {
  
     const { address,isConnected } = useAccount();
     const chainId = useChainId();
-    const [image,setImage] = useState("");
+    const [image,setImage] = useState("/image/bg-default.png");
     const [isMinted,setIsMinted] = useState(false);
     const [mintPrice,setMintPrice] = useState(BigInt(0));
     const [modifyPrice,setModifyPrice] = useState(BigInt(0)); 
@@ -138,7 +138,7 @@ export default function NFTBox() {
                 if (listReceipt.status == "success"){
                     toast.success("mint success !!!")
                     setIsMinted(true)
-                    
+                    getAccountBalance();
                 }
             }
         }
@@ -176,14 +176,14 @@ export default function NFTBox() {
         if(isConnected){
             getAccountBalance()
         }
-        //setMinted(false);
+        setIsMinted(false);
     },[address, chainId])
     return(
         <>
         
     
         <div className="justify-center">
-            <Card className="col-span-12 sm:col-span-4 h-[500px] rounded-lg  border-carousel bg-[url('/image/expectrum-1191724_640.png')] bg-center bg-no-repeat">
+            <Card className="col-span-12 sm:col-span-4 h-[500px] rounded-lg  border-carousel ">
                 <Image 
                     className="m-2"
                     width={450}
@@ -191,23 +191,30 @@ export default function NFTBox() {
                     alt="NextUI hero Image"
                     src={image}
                 />
-                <CardFooter className="absolute flex flex-col justify-start rounded-br-sm rounded-bl-sm bg-black/60 bottom-0 z-10 border-t-1 border-default-600 dark:border-default-100">
-                <h2 className="text-white mr-2">TokenID: {TOKEN_ID.toString()}</h2>
-                <h2 className="text-white mr-2">Name:{name===""?"Mint Your NFT":name}</h2>
-                <h2 className="text-white mr-2">Email:{email}</h2>
-                <h2 className="text-white mr-2">{github}</h2>
-                <h2 className="text-white mr-2">{xAccount}</h2>
+                <CardFooter className="absolute flex flex-col items-start pl-5 rounded-br-sm rounded-bl-sm bg-black/60 bottom-0 z-10 border-t-1 border-default-600 dark:border-default-100">
+                {name==="" && 
+                <h2 className="text-white">Mint Your NFT</h2>
+                }
+                {name!=="" && 
+                    <>
+                        <h2 className="text-white">TokenID: {TOKEN_ID.toString()}</h2>
+                        <h2 className="text-white">Name:{name===""?"Mint Your NFT":name}</h2>
+                        <h2 className="text-white">Email:{email}</h2>
+                        <h2 className="text-white">{github}</h2>
+                        <h2 className="text-white">{xAccount}</h2>
+                    </>
+                }
                 </CardFooter>
             </Card>
             <div className="flex m-5 justify-center">
             <div className="mr-5">
                 <Button  onPress={onOpen} isLoading={isPending} isDisabled={isMinted}  radius="full" className="bg-gradient-to-tr from-pink-500 to-yellow-500 text-white shadow-lg">
-                    Mint NFT <span>{formatEther(mintPrice)} ETH</span>
+                    Mint NFT {mintPrice > 0 && <span>{formatEther(mintPrice)} ETH</span>}
                 </Button>
             </div>
-            <div>
-                <Button onClick={()=>{console.log("Look For")}}  isDisabled={!isMinted} radius="full" className="bg-gradient-to-r from-cyan-500 to-blue-500 text-white shadow-lg">
-                Find <span>{formatEther(modifyPrice)} ETH</span>
+            <div className="mr-5">
+                <Button onClick={()=>{console.log("Look For")}}  radius="full" className="bg-gradient-to-r from-cyan-500 to-blue-500 text-white shadow-lg">
+                    Modify {modifyPrice > 0 && <span>{formatEther(modifyPrice)} ETH</span>}
                 </Button>
             </div>
             </div>
