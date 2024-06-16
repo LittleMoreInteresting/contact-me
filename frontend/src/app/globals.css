@@ -10,6 +10,6 @@
 }
 
 .border-carousel {
-  @apply border-4 border-solid;
+  @apply border-2 border-solid ;
   animation: border-animation 5s linear infinite;
 }

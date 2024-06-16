@@ -8,7 +8,9 @@ import {
   cookieToInitialState,
 } from 'wagmi'
  
+import AppHeader from '@/app/components/AppHeader'
 
+import Footer from '@/app/components/Footer'
 import { wagmiConfig } from "@/app/wagmiConfig"
 
 const inter = Inter({ subsets: ["latin"] });
@@ -31,7 +33,14 @@ export default function RootLayout({
     <html lang="en">
       <body className={inter.className}>
         <Providers  initialState={initialState}>
-        {children}
+        <div className="flex flex-col items-center justify-between p-15 h-screen">
+      <AppHeader />
+      <div className="container">
+      {children}
+      </div>
+      <Footer />
+    </div>
+       
           
           <Toaster position="bottom-right"  expand={true}
                      toastOptions={{

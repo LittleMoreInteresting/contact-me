@@ -43,7 +43,7 @@ const config = getDefaultConfig({
     //optimism,
     //arbitrum,
     //base,
-    sepolia,
+    //sepolia,
     lineaSepolia,
   ],
   ssr: true,

@@ -8,20 +8,14 @@ import {sepolia,mainnet,
 
 const httpSepolia = process.env.NEXT_PUBLIC_INFURA_LINEA_SEPOLIA as string
 export const wagmiConfig = createConfig({
-    chains: [sepolia,mainnet, polygon, optimism, arbitrum, base,lineaSepolia],
+    chains: [lineaSepolia],
     ssr: true,
     storage: createStorage({
         key:"nft-market",
         storage: cookieStorage,
     }),
     transports:{
-        [lineaSepolia.id]: http(httpSepolia),
-        [sepolia.id]: http(),
-        [mainnet.id]: http(),
-        [polygon.id]: http(),
-        [optimism.id]: http(),
-        [arbitrum.id]: http(),
-        [base.id]: http(),
+        [lineaSepolia.id]: http(httpSepolia)
     },
 })
 
