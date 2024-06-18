@@ -1,7 +1,8 @@
 'use client'
 import {Image} from "@nextui-org/image";
 import {Button, Card,CardFooter,CardBody,Divider} from "@nextui-org/react";
-import React, {useState, useEffect, useRef, cache} from "react";
+import React  from "react";
+import {GithubOutlined,XOutlined,MailOutlined,NumberOutlined,UserOutlined } from "@ant-design/icons";
 
 export default function FoundBox(prop:{
     tokenId:bigint,
@@ -30,11 +31,11 @@ export default function FoundBox(prop:{
                 }
                 {name!=="" && 
                     <>
-                        <h2 className="text-white">TokenID: {tokenId.toString()}</h2>
-                        <h2 className="text-white">Name:{name}</h2>
-                        <h2 className="text-white">Email:{email}</h2>
-                        <h2 className="text-white">Github:{github}</h2>
-                        <h2 className="text-white">X:{xAccount}</h2>
+                        <h2 className="text-white"><NumberOutlined className="mr-3" />{tokenId}</h2>
+                        <h2 className="text-white"><UserOutlined className="mr-3" />{name}</h2>
+                        <h2 className="text-white"><MailOutlined className="mr-3" />{email}</h2>
+                        <h2 className="text-white"><GithubOutlined className="mr-3" />{github}</h2>
+                        <h2 className="text-white"><XOutlined className="mr-3" />{xAccount}</h2>
                     </>
                 }
                 </CardFooter>

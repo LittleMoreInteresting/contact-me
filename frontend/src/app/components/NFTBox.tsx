@@ -2,6 +2,8 @@
 import {Image} from "@nextui-org/image";
 import {Button, Card,CardFooter,CardBody,Divider} from "@nextui-org/react";
 import React, {useState, useEffect, useRef, cache} from "react";
+import {GithubOutlined,XOutlined,MailOutlined,NumberOutlined,UserOutlined } from "@ant-design/icons";
+
 import {
   useAccount,
   useChainId,
@@ -32,7 +34,7 @@ import { parseEther,formatEther,parseGwei } from "viem/utils";
 
 import {wagmiContractConfig } from "@/app/wagmiConfig"
 import { wagmiConfig } from "@/app/wagmiConfig"
-import { setAutomine } from "viem/actions";
+
 export default function NFTBox() {
  
     const { address,isConnected } = useAccount();
@@ -80,32 +82,26 @@ export default function NFTBox() {
             const tokenId = token.result;
             setTOKEN_ID(tokenId);
             if(tokenId > 0 ){
-                const [star,tokenUri] = await  multicall(wagmiConfig,{
-                    contracts:[
-                        {
-                            ...wagmiContractConfig,
-                            functionName: 'starWork',
-                            args: [tokenId],
-                        },
-                        {
-                            ...wagmiContractConfig,
-                            functionName: 'tokenURI',
-                            args: [tokenId],
-                        },
-                    ]
+                const {name,github,x,email} = await readContract(wagmiConfig,{
+                    ...wagmiContractConfig,
+                    functionName: 'starOf',
+                    args: [tokenId],
+                    account:address
                 })
-                if (tokenUri.status === "success"){
-                    setImage(tokenUri.result)
-                }
-                if(star.status === "success"){
-                    const [fields,] = star.result
-                    const {name,github,x,email} = fields;
-                    setName(name)
-                    setGithub(github)
-                    setXAccount(x)
-                    setEmail(email)
-                }
-                console.log(tokenUri,star)
+                setName(name)
+                setGithub(github)
+                setXAccount(x)
+                setEmail(email)
+               
+                const tokenUri = await readContract(wagmiConfig,{
+                    ...wagmiContractConfig,
+                    functionName: 'tokenURI',
+                    args: [tokenId],
+                    account:address
+                })
+                setImage(tokenUri)
+                console.log(tokenUri,name,github,x,email)
+                
             }
             
         }
@@ -115,7 +111,6 @@ export default function NFTBox() {
         if (modifyPrice.status === "success"){
             setModifyPrice(modifyPrice.result)
         }
-        console.log(balance,token,mintPrice,modifyPrice);
     }
     
     
@@ -165,13 +160,59 @@ export default function NFTBox() {
         })
         onClose();
     }
-    const clearVal = ()=>{
-        setName("");
-        setGithub("");
-        setXAccount("");
-        setEmail("");
+    // Modify
+    const {
+        data: hashModify,
+        error:errorModify,
+        isPending:isPendingModify,
+        writeContract:Modify,
+    } = useWriteContract({
+        mutation:{
+            onSuccess:async (hashModify, variables) => {
+                if (hashModify){
+                    toast.info("Transaction Hash:"+hashModify)
+                }
+                const listReceipt = await waitForTransactionReceipt(wagmiConfig,{
+                    hash:hashModify
+                })
+                if (listReceipt.status == "success"){
+                    toast.success("Modify success !!!")
+                    getAccountBalance();
+                }
+            }
+        }
+    })
+    if (errorModify) {
+        console.log(errorModify)
+        toast.error("Error: "+((errorModify as BaseError).shortMessage || errorModify.message))
     }
-    console.log(TOKEN_ID)
+    async function modifyNft() {
+        if (!isConnected){
+            toast.error("Not connected.")
+            return
+        }
+        if(name.trim() === "" || email.trim() === ""){
+            toast.error("place input your name && email .")
+            return
+        }
+        Modify({
+          ...wagmiContractConfig,
+          functionName: 'modify',
+          args: [name,github,xAccount,email],
+          value: modifyPrice,
+          gasPrice:parseGwei("20")
+        })
+        onClose();
+    }
+
+    const clearVal = ()=>{
+        if(!isMinted){
+            setName("");
+            setGithub("");
+            setXAccount("");
+            setEmail("");
+        }
+    }
     useEffect(()=>{
         if(isConnected){
             getAccountBalance()
@@ -197,11 +238,11 @@ export default function NFTBox() {
                 }
                 {name!=="" && 
                     <>
-                        <h2 className="text-white">TokenID: {TOKEN_ID.toString()}</h2>
-                        <h2 className="text-white">Name:{name===""?"Mint Your NFT":name}</h2>
-                        <h2 className="text-white">Email:{email}</h2>
-                        <h2 className="text-white">{github}</h2>
-                        <h2 className="text-white">{xAccount}</h2>
+                        <h2 className="text-white"><NumberOutlined className="mr-3" />{TOKEN_ID.toString()}</h2>
+                        <h2 className="text-white"><UserOutlined className="mr-3" />{name}</h2>
+                        <h2 className="text-white"><MailOutlined className="mr-3" />{email}</h2>
+                        <h2 className="text-white"><GithubOutlined className="mr-3" />{github}</h2>
+                        <h2 className="text-white"><XOutlined className="mr-3" />{xAccount}</h2>
                     </>
                 }
                 </CardFooter>
@@ -213,7 +254,7 @@ export default function NFTBox() {
                 </Button>
             </div>
             <div className="mr-5">
-                <Button onClick={()=>{console.log("Look For")}}  radius="full" className="bg-gradient-to-r from-cyan-500 to-blue-500 text-white shadow-lg">
+                <Button onClick={onOpen} isLoading={isPendingModify} isDisabled={!isMinted} radius="full" className="bg-gradient-to-r from-cyan-500 to-blue-500 text-white shadow-lg">
                     Modify {modifyPrice > 0 && <span>{formatEther(modifyPrice)} ETH</span>}
                 </Button>
             </div>
@@ -278,9 +319,17 @@ export default function NFTBox() {
                 <Button color="danger" variant="flat" onPress={onClose}>
                   Close
                 </Button>
-                <Button color="primary" onPress={mintNft}>
-                  Mint Now
-                </Button>
+                {!isMinted && 
+                  <Button color="primary" onPress={mintNft}>
+                    Mint Now
+                  </Button>
+                }
+                {isMinted && 
+                  <Button color="primary" onPress={modifyNft}>
+                    Modify
+                  </Button>
+                }
+                
               </ModalFooter>
             </>
           )}

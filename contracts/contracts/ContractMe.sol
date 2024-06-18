@@ -3,7 +3,7 @@ pragma solidity ^0.8.24;
 import "solmate/src/tokens/ERC721.sol";
 import "solmate/src/utils/LibString.sol";
 import "solmate/src/auth/Owned.sol";
-
+import "hardhat/console.sol";
 contract ContractMe is ERC721, Owned {
     using LibString for uint256;
 
@@ -14,7 +14,7 @@ contract ContractMe is ERC721, Owned {
         string email;
     }
     
-    mapping(address => uint256) lastModifyTime;
+    mapping(address => uint256) lastWalkTime;
     mapping(address => uint256) public userTokens;
     mapping(uint256 => Star) private tokenCardStorage;
     uint256 tokenIdCounter = 1;
@@ -23,6 +23,8 @@ contract ContractMe is ERC721, Owned {
     string[] starsImsage;
     address _owner;
     error ALREADY_MINTED();
+    error NOT_MINTED();
+    error NOT_OWNER();
     error ERROR_PRICE();
     error TransferFailed();
     event MINT_SUCCESS(uint256 indexed tokenId);
@@ -56,25 +58,42 @@ contract ContractMe is ERC721, Owned {
         _safeMint(msg.sender,tokenId);
         userTokens[msg.sender] = tokenId;
         tokenCardStorage[tokenId] = newStar;
-        lastModifyTime[msg.sender] = block.timestamp;
         emit MINT_SUCCESS(tokenId);
     }
     
-    function starWork(uint256 tokenId) external view returns(Star  memory star,bool isOwner){
-        if (ownerOf(tokenId) == msg.sender){
-            isOwner = true;
+    function starOf(uint256 tokenId) external view returns(Star  memory star){
+        if (ownerOf(tokenId) != msg.sender){
+            revert NOT_OWNER();
         }
         star = tokenCardStorage[tokenId];
     }
 
-    function modifyCard(string memory name,string memory github,string memory x,string memory email) external payable {
+    function starWalk() external view returns(Star memory star) {
+        require(tokenIdCounter>1,"no Star");
+        uint256 random = getRandomTokenId();
+        star = tokenCardStorage[random];
+    }
+
+    function getRandomTokenId() internal view returns(uint256){
+        bytes32 randomBytes = keccak256(abi.encodePacked(block.number, msg.sender, blockhash(block.timestamp-1)));
+        uint256 maxId = tokenIdCounter - 1;
+        
+        return (uint256(randomBytes) % maxId) + 1;
+    }
+    function modify(string memory name,string memory github,string memory x,string memory email) external payable {
+        if(balanceOf(msg.sender)==0){
+            revert NOT_MINTED();
+        }
+        if(msg.value < modifyPrice){
+            revert ERROR_PRICE();
+        }
         uint256 tokenId = userTokens[msg.sender];
-        Star memory start = tokenCardStorage[tokenId];
-        start.name = name;
-        start.github = github;
-        start.x = x;
-        start.email = email;
-        tokenCardStorage[tokenId] = start;
+        Star memory star = tokenCardStorage[tokenId];
+        star.name = name;
+        star.github = github;
+        star.x = x;
+        star.email = email;
+        tokenCardStorage[tokenId] = star;
         emit MODIFY_SUCCESS(tokenId);
     }
 

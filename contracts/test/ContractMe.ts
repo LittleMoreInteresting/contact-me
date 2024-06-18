@@ -1,5 +1,6 @@
 import {
     loadFixture,
+    time,
   } from "@nomicfoundation/hardhat-toolbox-viem/network-helpers";
   import { expect } from "chai";
   import hre from "hardhat";
@@ -44,14 +45,41 @@ import {
             })
             expect(await CM.read.balanceOf([owner.account.address])).to.equal(1n)
             const tokenId = await CM.read.userTokens([owner.account.address])
-            const [card,isOwner] = await CM.read.starWork([tokenId]);
+            const card = await CM.read.starOf([tokenId]);
             expect(card.name).equal("horace")
-            console.log(await publicClient.getBalance(CM),isOwner)
+            console.log(await publicClient.getBalance(CM))
             // modify
-            await CM.write.modifyCard(["horace-2024","d","e","f"])
-            const [cardNew,isOwnerNew] = await CM.read.starWork([tokenId]);
+            const modifyPrice = await CM.read.modifyPrice();
+            await CM.write.modify(["horace-2024","d","e","f"],{
+              value:modifyPrice
+            })
+            const cardNew = await CM.read.starOf([tokenId]);
             expect(cardNew.name).equal("horace-2024")
-            console.log(cardNew,isOwnerNew)
+            console.log(cardNew)
         })
     });
+    describe("Star Work",function(){
+      it("mint and star work",async function(){
+        const { CM,owner } = await loadFixture(deployContractMeFixture);
+        
+        const price = await CM.read.mintPrice();
+        const accounts = await owner.getAddresses()
+        for(let i=0;i<accounts.length;i++){
+          const addr = accounts[i];
+          await CM.write.mint(["a"+addr,"a"+i,"b"+i,"c"+i],{
+            value:price,
+            account:addr,
+          })
+        }
+        
+        for(let i=0;i<accounts.length;i++){
+          let s =  await CM.read.starWalk();
+          await time.increase(1);
+          
+          console.log(i,s);
+        }
+        
+      })
+    });
   })
+ 
