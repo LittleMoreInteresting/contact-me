@@ -468,6 +468,11 @@ export const nftAbi = [
       {
         "components": [
           {
+            "internalType": "uint256",
+            "name": "tokenId",
+            "type": "uint256"
+          },
+          {
             "internalType": "string",
             "name": "name",
             "type": "string"
@@ -502,6 +507,11 @@ export const nftAbi = [
     "outputs": [
       {
         "components": [
+          {
+            "internalType": "uint256",
+            "name": "tokenId",
+            "type": "uint256"
+          },
           {
             "internalType": "string",
             "name": "name",

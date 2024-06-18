@@ -8,6 +8,7 @@ contract ContractMe is ERC721, Owned {
     using LibString for uint256;
 
     struct Star {
+        uint256 tokenId;
         string name;
         string github;
         string x;
@@ -47,13 +48,14 @@ contract ContractMe is ERC721, Owned {
         if(msg.value < mintPrice){
             revert ERROR_PRICE();
         }
+         uint256 tokenId = tokenIdCounter;
         Star memory newStar = Star({
+            tokenId:tokenId,
             name:name,
             github:github,
             x:x,
             email:email  
         });
-        uint256 tokenId = tokenIdCounter;
         tokenIdCounter++;
         _safeMint(msg.sender,tokenId);
         userTokens[msg.sender] = tokenId;

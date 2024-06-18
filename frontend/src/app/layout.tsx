@@ -16,8 +16,8 @@ import { wagmiConfig } from "@/app/wagmiConfig"
 const inter = Inter({ subsets: ["latin"] });
 import { Toaster } from 'sonner';
 export const metadata: Metadata = {
-  title: "Contrct Me NFT",
-  description: "Contrct Me NFT app",
+  title: "Contact Me NFT",
+  description: "Contact Me NFT app",
 };
 
 export default function RootLayout({

@@ -10,8 +10,8 @@ You can mint an NFT by setting your name, email, x, etc.In the future, it will b
 
 
 ## How we built it
-
-
+1100000000000000
+600500000000000000
 ## Challenges we ran into
 
 

@@ -1,7 +1,7 @@
 'use client'
 import {Image} from "@nextui-org/image";
-import {Button, Card,CardFooter,CardBody,Divider} from "@nextui-org/react";
-import React, {useState, useEffect, useRef, cache} from "react";
+import {Button, Card,CardFooter,Divider} from "@nextui-org/react";
+import React, {useState, useEffect} from "react";
 import {GithubOutlined,XOutlined,MailOutlined,NumberOutlined,UserOutlined } from "@ant-design/icons";
 
 import {
@@ -14,8 +14,6 @@ import {  } from '@wagmi/core'
 import { 
   readContract,
   waitForTransactionReceipt,
-  watchContractEvent,
-  watchChainId,
   multicall
 } from '@wagmi/core'
 import {Modal,
@@ -24,13 +22,12 @@ import {Modal,
     ModalBody, 
     ModalFooter, 
     useDisclosure, 
-    Checkbox,
     Input,
     Link
 } from "@nextui-org/react";
 
 import { toast } from 'sonner'
-import { parseEther,formatEther,parseGwei } from "viem/utils";
+import { formatEther,parseGwei } from "viem/utils";
 
 import {wagmiContractConfig } from "@/app/wagmiConfig"
 import { wagmiConfig } from "@/app/wagmiConfig"
@@ -138,10 +135,7 @@ export default function NFTBox() {
             }
         }
     })
-    if (error) {
-        console.log(error)
-        toast.error("Error: "+((error as BaseError).shortMessage || error.message))
-    }
+    
     async function mintNft() {
         if (!isConnected){
             toast.error("Not connected.")
@@ -151,12 +145,17 @@ export default function NFTBox() {
             toast.error("place input your name && email .")
             return
         }
+        if (error) {
+            console.log(error)
+            toast.error("Error: "+((error as BaseError).shortMessage || error.message))
+            return;
+        }
         writeContract({
           ...wagmiContractConfig,
           functionName: 'mint',
           args: [name,github,xAccount,email],
           value: mintPrice,
-          gasPrice:parseGwei("20")
+          //gasPrice:parseGwei("20")
         })
         onClose();
     }
@@ -182,10 +181,7 @@ export default function NFTBox() {
             }
         }
     })
-    if (errorModify) {
-        console.log(errorModify)
-        toast.error("Error: "+((errorModify as BaseError).shortMessage || errorModify.message))
-    }
+    
     async function modifyNft() {
         if (!isConnected){
             toast.error("Not connected.")
@@ -195,12 +191,17 @@ export default function NFTBox() {
             toast.error("place input your name && email .")
             return
         }
+        if (errorModify) {
+            console.log(errorModify)
+            toast.error("Error: "+((errorModify as BaseError).shortMessage || errorModify.message))
+            return
+        }
         Modify({
           ...wagmiContractConfig,
           functionName: 'modify',
           args: [name,github,xAccount,email],
           value: modifyPrice,
-          gasPrice:parseGwei("20")
+          //gasPrice:parseGwei("20")
         })
         onClose();
     }
